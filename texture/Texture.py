@@ -32,7 +32,7 @@ class Texture:
                 G = img1[i, j, 1]
                 R = img1[i, j, 2]
                 self.np_img[j, self.hgt - i -1] = (R<<16) | (G<<8)  | (B) 
- 
+
 
     @ti.pyfunc
     def setup_data_gpu(self):
@@ -49,7 +49,7 @@ class Texture:
         return ti.Vector([R, G, B])
 
     @ti.func
-    def teture2D(self, u, v):
+    def texture2D(self, u, v):
         x = ts.clamp(u * self.wid, 0.0, self.wid -1.0)
         y = ts.clamp(v * self.hgt, 0.0, self.hgt -1.0)
         #   lt       rt
