@@ -2,7 +2,7 @@
 
 - The project is powered by [Taichi](https://github.com/taichi-dev/taichi) programming language
 
-## Current implement acceleration
+## core tech overview
 - [lvbh](https://developer.nvidia.com/blog/thinking-parallel-part-iii-tree-construction-gpu/)
 - [disney brdf](https://github.com/wdas/brdf)
 - [bdpt](https://pbr-book.org/3ed-2018/Light_Transport_III_Bidirectional_Methods/Bidirectional_Path_Tracing)
