@@ -38,11 +38,11 @@
 
 ### spectral render
 
-- using the red color is produced by spd below
+- The red color is produced by spd below
 
 <img src="spectrum/red.png" width="512"/>
 
-- produce a d65 cornel box
+- produce a d65 cornell box
 
 <img src="image/spectral-cornellbox.png"/>
 
