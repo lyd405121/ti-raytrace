@@ -239,6 +239,10 @@ def set_node_axis(bvh_node, index, axis):
     bvh_node[index][0] =float(int(bvh_node[index][0]) & (0xfff9 | type))
 
 @ti.func
+def set_node_prim_size(bvh_node, index, size):
+    bvh_node[index][0] =float(int(bvh_node[index][0]) & (0x0007 | size))
+
+@ti.func
 def set_node_left(bvh_node, index, left):
     bvh_node[index][1]  = float(left)
 @ti.func
@@ -294,14 +298,17 @@ def get_compact_node_type(bvh_node, index):
 def get_compact_node_axis(bvh_node, index):
     return  int(bvh_node[index][0]) & 0x0006 
 @ti.func
+def get_compact_node_prim_size(bvh_node, index):
+    return  int(bvh_node[index][0]) & 0xfff8  
+@ti.func
 def get_compact_node_prim(bvh_node, index):
     return int(bvh_node[index][1])
 @ti.func
 def get_compact_node_offset(bvh_node, index):
-    return int(bvh_node[index][2])
+    return int(bvh_node[index][1])
 @ti.func
 def get_compact_node_min_max(bvh_node, index):
-    return ti.Vector([bvh_node[index][3], bvh_node[index][4], bvh_node[index][5] ]),ti.Vector([bvh_node[index][6], bvh_node[index][7], bvh_node[index][8] ])
+    return ti.Vector([bvh_node[index][2], bvh_node[index][3], bvh_node[index][4] ]),ti.Vector([bvh_node[index][5], bvh_node[index][6], bvh_node[index][7] ])
 
 
 

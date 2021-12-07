@@ -10,7 +10,9 @@ import trimesh
 import SceneData as SCD
 import UtilsFunc as UF
 import taichi_glsl as ts
-import Bvh as Bvh
+import LBvh as LBvh
+import SahBvh as SBvh
+
 import Texture as TX
 import queue
 
@@ -284,8 +286,11 @@ class Scene:
         ti.root.dense(ti.i, self.vertex_count    ).place(self.smooth_normal )
         ti.root.dense(ti.ij, [self.vertex_count,MAX_STACK_SIZE] ).place(self.stack  )
         
-        self.bvh = Bvh.Bvh(self.primitive_count, self.minboundarynp, self.maxboundarynp)
+        self.bvh = LBvh.Bvh(self.primitive_count, self.minboundarynp, self.maxboundarynp)
         self.bvh.setup_data_cpu()
+
+        #self.bvh = SBvh.Bvh(self.primitive_count, self.minboundarynp, self.maxboundarynp)
+        #self.bvh.setup_data_cpu(self.vertex_cpu, self.shape_cpu, self.primitive_cpu)
 
         if self.env_power == 0.0:
             self.env.load_image("image/black.png")
@@ -301,9 +306,9 @@ class Scene:
         self.vertex_index.from_numpy(self.vertex_index_np)
         self.smooth_normal.from_numpy(self.smooth_normal_np)
 
-
         self.env.setup_data_gpu()
         self.bvh.setup_data_gpu(self.vertex, self.shape, self.primitive)
+
 
 
     ############algrithm##############
@@ -675,8 +680,7 @@ class Scene:
             node_index = stack[i, j, stack_pos]
             stack_pos  = stack_pos-1
             #type_n     = UF.get_node_type(self.bvh.compact_node, node_index)
-            offset     = UF.get_compact_node_offset(self.bvh.compact_node, node_index)
-            if offset < 0:
+            if UF.get_compact_node_type(self.bvh.compact_node, node_index) == SCD.IS_LEAF:
                 shadow_prim          = UF.get_compact_node_prim(self.bvh.compact_node, node_index)
                 t                    = self.intersect_prim_any(origin, direction, shadow_prim)
                 if ( t < hit_t ) & (t > 0.0):
@@ -686,7 +690,7 @@ class Scene:
                 min_v,max_v = UF.get_compact_node_min_max(self.bvh.compact_node, node_index)
                 if UF.slabs(origin, direction,min_v,max_v) == 1:
                     left_node  = node_index+1
-                    right_node = offset
+                    right_node = UF.get_compact_node_offset(self.bvh.compact_node, node_index)
                     #push
                     stack_pos              += 1
                     stack[i, j, stack_pos] = left_node
@@ -711,8 +715,9 @@ class Scene:
             node_index = stack[i, j, stack_pos]
             stack_pos  = stack_pos-1
 
-            offset     = UF.get_compact_node_offset(self.bvh.compact_node, node_index)
-            if offset < 0:
+            
+            
+            if UF.get_compact_node_type(self.bvh.compact_node, node_index) == SCD.IS_LEAF:
                 prim_index          = UF.get_compact_node_prim(self.bvh.compact_node, node_index)
                 t, pos, gnormal,normal, tex  = self.intersect_prim(origin, direction, prim_index)
                 if ( t < hit_t ) & (t > 0.0):
@@ -726,7 +731,7 @@ class Scene:
                 min_v,max_v = UF.get_compact_node_min_max(self.bvh.compact_node, node_index)
                 if UF.slabs(origin, direction,min_v,max_v) == 1:
                     left_node  = node_index+1
-                    right_node = offset
+                    right_node = UF.get_compact_node_offset(self.bvh.compact_node, node_index)
                     #push
                     stack_pos              += 1
                     stack[i, j, stack_pos] = left_node
@@ -760,10 +765,10 @@ class Scene:
                 #pop
                 node_index = self.stack[i,stack_pos]
                 stack_pos  = stack_pos-1
-                type_n     = UF.get_node_type(self.bvh.bvh_node, node_index)
+                type_n     = UF.get_compact_node_type(self.bvh.compact_node, node_index)
 
-                if type_n == Bvh.IS_LEAF:
-                    prim_index = UF.get_node_prim(self.bvh.bvh_node, node_index)
+                if type_n == SCD.IS_LEAF:
+                    prim_index = UF.get_compact_node_prim(self.bvh.compact_node, node_index)
                     prim_type  = UF.get_prim_type(self.primitive, prim_index)
 
                     if prim_type == SCD.PRIMITIVE_TRI:
@@ -779,14 +784,15 @@ class Scene:
                                     #self.smooth_normal[i]    += neighbour_rormal
 
                 else:
-                    min_v,max_v = UF.get_node_min_max(self.bvh.bvh_node, node_index)
+                    min_v,max_v = UF.get_compact_node_min_max(self.bvh.compact_node, node_index)
                     if (v.x >= min_v.x) & (v.y >= min_v.y) & (v.z >= min_v.z) & (v.x <= max_v.x) & (v.y <= max_v.y) & (v.z <= max_v.z):
-                        left_node,right_node   = UF.get_node_child(self.bvh.bvh_node,  node_index)          
+                        #left_node,right_node   = UF.get_node_child(self.bvh.bvh_node,  node_index)  
+                        offset     = UF.get_compact_node_offset(self.bvh.compact_node, node_index)        
                         #push
                         stack_pos              += 1
-                        self.stack[i,stack_pos] = int(left_node)
+                        self.stack[i,stack_pos] = int(node_index+1)
                         stack_pos              += 1
-                        self.stack[i,stack_pos] = int(right_node)
+                        self.stack[i,stack_pos] = int(offset)
 
         for i in self.vertex:
             UF.set_vertex_normal(self.vertex, i, self.smooth_normal[i].normalized())

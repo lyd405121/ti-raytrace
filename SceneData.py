@@ -52,6 +52,8 @@ MAT_GLASS       = 1.0
 MAT_LIGHT       = 2.0
 MAT_SPECTRAL   = 10.0
 
+IS_LEAF           = 1
+
 class Material:
     def __init__(self):
         self.type      = 0
@@ -115,7 +117,8 @@ class Shape:
         self.param[4] = normal[1]
         self.param[5] = normal[2]
 
-
+    def getRadius(self):
+        return self.param[0]
 
     def fillStruct(self, np_data, index):
         np_data[index, 0] = float(self.type)
@@ -169,3 +172,43 @@ class Primitive:
         np_data[index, 0] = self.type
         np_data[index, 1] = self.vertex_shape_index
         np_data[index, 2] = self.mat_index
+
+#             32bit                     | 32bit    | 32bit       | 32bit      | 32bit     |96bit  |96bit 
+#bvh_node  :  is_leaf axis    prim_size |left_node  right_node   parent_node  prim_index   min_v3  max_v3   11
+#             1bit   2bit     29 bit      
+
+#                32bit                   |32bit               |96bit  |96bit 
+#compact_node  : is_leaf axis prim_size  |prim_index /offset  min_v3  max_v3   8
+#                1bit   2bit  29 bit     
+
+class Bounds:
+    def __init__(self):
+        self.min_v3              = [np.Infinity,np.Infinity,np.Infinity]
+        self.max_v3              = [-np.Infinity,-np.Infinity,-np.Infinity]
+
+    def Merge(self, v):
+        for k in range(3):
+            self.min_v3[k] = min(self.min_v3[k], v[k])
+            self.max_v3[k] = max(self.max_v3[k], v[k])
+
+    def MergeBox(self, b):
+        self.Merge(b.min_v3)
+        self.Merge(b.max_v3)
+
+
+    def GetSurfaceArea(self):
+        e1 = self.max_v3[0] - self.min_v3[0]
+        e2 = self.max_v3[1] - self.min_v3[1]
+        e3 = self.max_v3[2] - self.min_v3[2]
+        return 2.0*(e1*e2+e2*e3+e3*e1)
+
+class BVHNode:
+    def __init__(self):
+        self.is_leaf             = 0
+        self.axis                = 0
+        self.left_node           = 0
+        self.right_node          = 0
+        self.parent_node         = 0
+        self.prim_index          = 0
+        self.min_v3              = [np.Infinity,np.Infinity,np.Infinity]
+        self.max_v3              = [-np.Infinity,-np.Infinity,-np.Infinity] 

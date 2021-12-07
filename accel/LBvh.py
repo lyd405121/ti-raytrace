@@ -9,7 +9,6 @@ import taichi_glsl as ts
 
 HIT_TRI           = 0.0
 HIT_SHA           = 1.0
-IS_LEAF           = 1
 
 
 @ti.data_oriented
@@ -108,7 +107,7 @@ class Bvh:
         max_point = [bvh_node[index, 9],bvh_node[index, 10],bvh_node[index, 11]]
         chech_pass = 1
 
-        if is_leaf == IS_LEAF:
+        if is_leaf == SCD.IS_LEAF:
             self.leaf_node_count += 1
         else:
             for i in range(3):
@@ -146,14 +145,12 @@ class Bvh:
         right   = int(bvh_node[index, 2])
 
         compact_node[retOffset][0] = bvh_node[index, 0]
-        compact_node[retOffset][1] = -1
-        compact_node[retOffset][2] = -1
         for i in range(6):
-            compact_node[retOffset][3+i] = bvh_node[index, 5+i]
+            compact_node[retOffset][2+i] = bvh_node[index, 5+i]
 
-        if is_leaf != IS_LEAF:
+        if is_leaf != SCD.IS_LEAF:
             self.flatten_tree(compact_node, bvh_node, left)
-            compact_node[retOffset][2] = self.flatten_tree(compact_node,bvh_node, right)
+            compact_node[retOffset][1] = self.flatten_tree(compact_node,bvh_node, right)
             #print(self.offset, index, file = self.fo)
         else:
             compact_node[retOffset][1] = bvh_node[index, 4]
@@ -197,16 +194,15 @@ class Bvh:
         self.min_boundary.from_numpy(self.minboundarynp)
         #print(self.light.to_numpy())
         
+        #### lbvh build
         self.build_morton_3d(vertex, shape, primitive)
         print("morton code is built")
         self.radix_sort_host()
         print("radix sort  is done")
         #self.print_morton_reslut()
-
-        
-        self.build_bvh(vertex, shape, primitive)
+        self.build_lbvh(vertex, shape, primitive)
         print("tree build  is done")
-        
+
         done_prev = 0
         done_num  = 0
         while done_num < self.primitive_count-1:
@@ -389,9 +385,9 @@ class Bvh:
             self.morton_code_s[i]    = self.morton_code_d[i]
             self.radix_count_zero[0] = 0
 
-    
+
     @ti.kernel
-    def build_bvh(self, vertex:ti.template(), shape:ti.template(), primitive:ti.template()):
+    def build_lbvh(self, vertex:ti.template(), shape:ti.template(), primitive:ti.template()):
         
         for i in self.bvh_node:
             UF.init_bvh_node(self.bvh_node, i)
@@ -399,7 +395,9 @@ class Bvh:
 
         for i in self.bvh_node:
             if i >= self.primitive_count-1:
-                UF.set_node_type(self.bvh_node, i, IS_LEAF)
+                UF.set_node_type(self.bvh_node, i, SCD.IS_LEAF)
+                UF.set_node_prim_size(self.bvh_node, i, 1)
+
                 prim_index = self.morton_code_s[i-self.primitive_count+1][1]
                 UF.set_node_prim(self.bvh_node, i, prim_index)
                 prim_type  = UF.get_prim_type(primitive, prim_index)
@@ -428,7 +426,7 @@ class Bvh:
                 UF.set_node_min_max(self.bvh_node, i, min_v3,max_v3)
             
             else:
-                UF.set_node_type(self.bvh_node, i, 1-IS_LEAF)
+                UF.set_node_type(self.bvh_node, i, 1-SCD.IS_LEAF)
                 l_r_range   = self.determineRange(i)
                 spilt       = self.findSplit(l_r_range[0], l_r_range[1])
  
@@ -450,6 +448,7 @@ class Bvh:
                 UF.set_node_right(self.bvh_node,  i, right_node)
                 UF.set_node_parent(self.bvh_node, left_node, i)
                 UF.set_node_parent(self.bvh_node, right_node, i)
+
 
     @ti.kernel
     def gen_aabb(self):
