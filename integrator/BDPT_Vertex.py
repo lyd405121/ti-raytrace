@@ -19,7 +19,7 @@ class Vertex:
         self.mat       = ti.field( dtype=ti.i32)
         self.delta     = ti.field( dtype=ti.i32)
         self.power     = ti.field( dtype=ti.f32)
-    @ti.pyfunc
+    
     def setup_data_cpu(self):
         
         #ti.root.dense(ti.ijk, [self.imgSizeX, self.imgSizeY, self.depth] ).place(self.pos,self.normal,self.snormal,self.beta, self.wo, self.fpdf,self.rpdf,self.type ,self.prim,self.mat   )
@@ -37,7 +37,7 @@ class Vertex:
         ti.root.dense(ti.ijk, [self.imgSizeX, self.imgSizeY, self.depth] ).place(self.mat       )
         ti.root.dense(ti.ijk, [self.imgSizeX, self.imgSizeY, self.depth] ).place(self.delta     )
         ti.root.dense(ti.ijk, [self.imgSizeX, self.imgSizeY, self.depth] ).place(self.power     )
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         # do nothing
         self.depth     = self.depth

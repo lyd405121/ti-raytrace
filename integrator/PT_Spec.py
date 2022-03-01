@@ -51,7 +51,7 @@ class PathTrace:
         self.scene      = scene
         self.stack_size = stack_size
 
-    @ti.pyfunc
+    
     def setup_data_cpu(self):
         Data   = []
         for line in open("spectrum/ciexyz31_1.csv", "r"):
@@ -85,7 +85,7 @@ class PathTrace:
         self.green.load_table("spectrum/green-spec.csv")
         self.white.load_table("spectrum/white-spec.csv")
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         self.sensor.from_numpy(self.data_np)
         self.rgb2spec.setup_data_gpu()
@@ -97,7 +97,7 @@ class PathTrace:
 
         self.normalize_spec(self.d65)
 
-    @ti.pyfunc
+    
     def normalize_spec(self, spec):
         self.cal_white_point(spec)
         
@@ -188,7 +188,8 @@ class PathTrace:
 
     @ti.kernel
     def render(self):
-        cam, scene  = ti.static(self.cam, self.scene)
+        cam  = self.cam 
+        scene = self.scene
         for i,j in self.rgb_film:
 
             next_origin     = cam.get_ray_origin()

@@ -18,7 +18,7 @@ class example(Example.example):
         self.scene.add_obj('model/cornell_box.obj')
         self.integrator       = PT_RGB.PathTrace(self.imgSizeX, self.imgSizeY, self.cam, self.scene,64)      
 
-    @ti.pyfunc
+    
     def build_scene(self):
         Example.example.build_scene(self)
         self.scene.total_area()
@@ -30,6 +30,6 @@ class example(Example.example):
         self.cam.update()
 
 
-    @ti.pyfunc
+    
     def render(self):
         return Example.example.render(self)

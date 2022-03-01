@@ -50,7 +50,7 @@ class Camera:
         self.fps          = 30.0
 
 
-    @ti.pyfunc
+    
     def yaw_cam(self, targetx, targety, targetz):
         self.target[0] = targetx
         self.target[1] = targety
@@ -58,7 +58,7 @@ class Camera:
         if self.yaw < 3.14:
             self.set_view_point(self.yaw + 0.003, 0.0, 0.0, 3.0)
 
-    @ti.pyfunc
+    
     def pitch_cam(self, targetx, targety, targetz):
         self.target[0] = targetx
         self.target[1] = targety
@@ -66,7 +66,7 @@ class Camera:
         if self.pitch < 0.5:
             self.set_view_point(0.0, self.pitch + 0.003, 0.0, 3.0)
 
-    @ti.pyfunc
+    
     def update(self):
         
         self.pitch = min(self.pitch, 1.57)
@@ -85,7 +85,7 @@ class Camera:
         yaxis = np.cross(zaxis, xaxis)
 
         view_np = self.view.to_numpy()
-        view_np[0] = ti.np.array([ [xaxis[0], xaxis[1], xaxis[2], -np.dot(xaxis, self.eye_np[0,:])], \
+        view_np[0] = np.array([ [xaxis[0], xaxis[1], xaxis[2], -np.dot(xaxis, self.eye_np[0,:])], \
         [yaxis[0], yaxis[1], yaxis[2], -np.dot(yaxis,self.eye_np[0,:])], \
         [zaxis[0], zaxis[1], zaxis[2], -np.dot(zaxis,self.eye_np[0,:])], [0.0, 0.0, 0.0, 1.0] ])
         self.view.from_numpy(view_np)
@@ -95,7 +95,7 @@ class Camera:
         #print(view_np)
         #print(self.fx,self.fy, self.cx, self.cy)
 
-    @ti.pyfunc
+    
     def set_view_point(self, yaw, pitch, roll,scale):
         self.pitch = pitch
         self.yaw = yaw
@@ -103,7 +103,7 @@ class Camera:
         self.scale = scale
         self.update()
 
-    @ti.pyfunc
+    
     def set_target(self, targetx, targety, targetz):
         self.target[0] = targetx
         self.target[1] = targety
@@ -111,7 +111,7 @@ class Camera:
         self.update()
 
 
-    @ti.pyfunc
+    
     def update_frame(self):
         self.frame += 1
         self.frame_cpu[0] = self.frame 

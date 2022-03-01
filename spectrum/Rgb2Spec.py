@@ -11,7 +11,7 @@ class Rgb2Spec:
         self.table_res   = 0
         self.table_size  = 0
 
-    @ti.pyfunc
+    
     def load_table(self, table_path):
 
         index = 0
@@ -36,7 +36,7 @@ class Rgb2Spec:
         ti.root.dense(ti.i, (self.table_size    ) ).place(self.table_data)
         ti.root.dense(ti.i, (self.table_res     ) ).place(self.table_scale)
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         self.table_data.from_numpy(self.table_data_np)
         self.table_scale.from_numpy(self.table_scale_np)

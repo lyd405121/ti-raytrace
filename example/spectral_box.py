@@ -25,7 +25,7 @@ class example(Example.example):
         self.scene.material_cpu[1].alebdoTex   = 1
         self.scene.material_cpu[2].alebdoTex   = 2
 
-    @ti.pyfunc
+    
     def build_scene(self):
         Example.example.build_scene(self)
 
@@ -38,6 +38,6 @@ class example(Example.example):
         self.cam.set_target(centre[0,0]*0.5, centre[0,1]*0.5, centre[0,2]*0.5)
         self.cam.update()
 
-    @ti.pyfunc
+    
     def render(self):
         return Example.example.render(self)

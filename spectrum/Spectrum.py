@@ -14,7 +14,7 @@ class Spectrum:
         self.size         = 0
         self.white_point  = ti.Vector.field(3, dtype=ti.f32, shape=(1))
         
-    @ti.pyfunc
+    
     def load_table(self, table_path):
         Data   = []
         for line in open(table_path, "r"):
@@ -34,7 +34,7 @@ class Spectrum:
         ti.root.dense(ti.i, (self.size) ).place(self.data)
 
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         self.data.from_numpy(self.data_np)
 

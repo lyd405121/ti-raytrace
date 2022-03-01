@@ -35,14 +35,14 @@ class Bvh:
         self.leaf_node_count  = 0
     ########################host function#####################################
 
-    @ti.pyfunc
+    
     def get_pot_num(self, num):
         m = 1
         while m<num:
             m=m<<1
         return m >>1
 
-    @ti.pyfunc
+    
     def get_pot_bit(self, num):
         m   = 1
         cnt = 0
@@ -51,7 +51,7 @@ class Bvh:
             cnt += 1
         return cnt
 
-    @ti.pyfunc
+    
     def blelloch_scan_host(self, mask, move):
         self.radix_sort_predicate(mask, move)
 
@@ -63,7 +63,7 @@ class Bvh:
 
         #print(self.radix_offset.to_numpy(), self.radix_count_zero.to_numpy())
 
-    @ti.pyfunc
+    
     def radix_sort_host(self):
         for i in range(30):
             mask   = 0x00000001 << i
@@ -71,7 +71,7 @@ class Bvh:
             #print("********************", self.radix_count_zero.to_numpy())
             self.radix_sort_fill(mask, i)
 
-    @ti.pyfunc
+    
     def print_morton_reslut(self):
         tmp = self.morton_code_s.to_numpy()
         for i in range(0, self.primitive_count):
@@ -160,7 +160,7 @@ class Bvh:
 
         return retOffset
 
-    @ti.pyfunc
+    
     def build_compact_node(self, bvh_node, compact_node):
         self.fo = open("nodelist.txt", "w")
         
@@ -173,7 +173,7 @@ class Bvh:
         self.compact_node.from_numpy(compact_node)
 
 
-    @ti.pyfunc
+    
     def setup_data_cpu(self):
         self.node_count      = self.primitive_count*2-1
         self.primitive_pot   = (self.get_pot_num(self.primitive_count)) << 1
@@ -188,7 +188,7 @@ class Bvh:
         ti.root.dense(ti.i, self.node_count).place(self.compact_node )
 
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self, vertex, shape, primitive):
         self.max_boundary.from_numpy(self.maxboundarynp)
         self.min_boundary.from_numpy(self.minboundarynp)

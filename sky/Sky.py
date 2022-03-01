@@ -79,7 +79,7 @@ class Sky:
 
         #ti.root.dense(ti.i, (self.size) ).place(self.data)
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         self.update()
 
@@ -97,13 +97,13 @@ class Sky:
         self.sun_dir.from_numpy(self.sun_dir_np )
         #print(self.sun_dir_np)
 
-    @ti.pyfunc
+    
     def formula(self,t, A0,A1,A2,A3,A4,A5):
         return pow(1.0-t, 5.0) * A0  + 5.0  * pow(1.0-t, 4.0) * t * A1 +\
             10.0*pow(1.0-t, 3.0)*pow(t, 2.0) * A2 +10.0*pow(1.0-t, 2.0)*pow(t, 3.0) * A3 +\
             5.0*(1.0-t)*pow(t, 4.0) * A4 + pow(t, 5.0)  * A5
 
-    @ti.pyfunc
+    
     def update(self):
         albedo = self.albedo
         int_turbidity   = int(self.turbidity)

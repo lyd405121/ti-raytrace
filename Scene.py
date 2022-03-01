@@ -55,7 +55,7 @@ class Scene:
         self.env_power               = 0.0
     ########################host function#####################################
 
-    @ti.pyfunc
+    
     def add_obj(self, filename):
         '''
         mesh = trimesh.load(filename, force='mesh')
@@ -143,29 +143,29 @@ class Scene:
 
 
 
-    @ti.pyfunc
+    
     def cross(self, left, right):
         return [left[1] * right[2] - left[2] * right[1] , left[2] * right[0]  - left[0] *right[2] , left[0] * right[1]  - left[1] * right[0] ]
 
-    @ti.pyfunc
+    
     def length(self, v):
         return math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]) 
 
-    @ti.pyfunc
+    
     def minus(self, left, right):
         return [left[0]-right[0], left[1]-right[1], left[2]-right[2]]
 
-    @ti.pyfunc
+    
     def add(self, left, right):
         return [left[0]+right[0], left[1]+right[1], left[2]+right[2]]
 
 
-    @ti.pyfunc
+    
     def mul(self, left, right):
         return [left[0]*right[0], left[1]*right[1], left[2]*right[2]]
 
 
-    @ti.pyfunc
+    
     def cal_normal(self):
         for i in range(0, self.vertex_count, 3):
             if self.length(self.vertex_cpu[i].normal) == 0.0:
@@ -179,12 +179,12 @@ class Scene:
                 self.vertex_cpu[i+2].normal  = self.vertex_cpu[i].normal
             #print(i, "a", self.vertex_cpu[i].normal)
 
-    @ti.pyfunc
+    
     def add_env(self, filename, env_power):
         self.env.load_image("image/env.png")
         self.env_power  = env_power
 
-    @ti.pyfunc
+    
     def add_shape(self, shape, mat):
         if mat.type == SCD.MAT_LIGHT:
             self.light_cpu.append(self.primitive_count)
@@ -205,7 +205,7 @@ class Scene:
         self.material_count += 1
 
 
-    @ti.pyfunc
+    
     def write_data_debug(self):
         filename = "debug.obj"
         fo = open(filename, "w")
@@ -219,7 +219,7 @@ class Scene:
             print ("f %d\%d %d\%d %d\%d " %  (3*i+1, 3*i+1, 3*i+2, 3*i+2, 3*i+3, 3*i+3), file = fo)
         fo.close()
 
-    @ti.pyfunc
+    
     def setup_data_cpu(self):
         print("***************mat:%d*******************"%(self.material_count))
         self.material_np  = np.zeros(shape=(self.material_count, SCD.MAT_VEC_SIZE), dtype=np.float32)
@@ -295,7 +295,7 @@ class Scene:
         if self.env_power == 0.0:
             self.env.load_image("image/black.png")
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         self.shape.from_numpy(self.shape_np)
         self.light.from_numpy(self.light_np)

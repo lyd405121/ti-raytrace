@@ -30,20 +30,22 @@ class PathTrace:
         self.cam        = cam
         self.scene      = scene
         self.stack_size = stack_size
-    @ti.pyfunc
+    
     def setup_data_cpu(self):
         ti.root.dense(ti.ij, [self.imgSizeX, self.imgSizeY] ).place(self.rgb_film)
         ti.root.dense(ti.ij, [self.imgSizeX, self.imgSizeY] ).place(self.hdr)
         ti.root.dense(ti.ijk, [self.imgSizeX, self.imgSizeY, self.stack_size] ).place(self.stack)
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         # do nothing
         self.imgSizeX = self.imgSizeX
 
     @ti.kernel
     def render(self):
-        cam, scene  = ti.static(self.cam, self.scene)
+        cam  = self.cam 
+        scene = self.scene
+
         for i,j in self.rgb_film:
 
             next_origin     = cam.get_ray_origin()

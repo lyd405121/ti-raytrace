@@ -22,7 +22,7 @@ class Bvh:
         self.depth           = 0
         self.compact_node    = ti.Vector.field(SCD.CPNOD_VEC_SIZE, dtype=ti.f32)
         self.cur_sort_axis   = -1
-    @ti.pyfunc
+    
     def get_face_bounds(self,  face_index):
         b = SCD.Bounds()  
         if self.primitive[face_index].type  == SCD.PRIMITIVE_TRI:
@@ -41,7 +41,7 @@ class Bvh:
                 b.Merge(s.pos)
         return b
 
-    @ti.pyfunc
+    
     def get_face_array_bounds(self,  face_start, face_end):
         b = SCD.Bounds()   
         for i in range(face_start,face_end+1):
@@ -49,7 +49,7 @@ class Bvh:
         return b
  
  
-    @ti.pyfunc
+    
     def get_prim_centroid(self,  prim_index):
         c               = [0.0,0.0,0.0]
         if self.primitive[prim_index].type  == SCD.PRIMITIVE_TRI:
@@ -63,7 +63,7 @@ class Bvh:
             c  = self.shape[self.primitive[prim_index].vertex_shape_index].pos
         return c
         
-    @ti.pyfunc
+    
     def sah_split(self,  face_start, face_end):
         bestAxis = 0
         bestIndex = 0
@@ -103,7 +103,7 @@ class Bvh:
         self.cpu_sorter(face_start, face_end, bestAxis)
         return bestIndex +1+ face_start
 
-    @ti.pyfunc
+    
     def build_node(self, face_start, face_end):
         numFaces = face_end - face_start+1
         node = SCD.BVHNode()
@@ -134,7 +134,7 @@ class Bvh:
         return split
 
 
-    @ti.pyfunc
+    
     def build(self):
         self.node_index = 0
         start = Queue()
@@ -153,7 +153,7 @@ class Bvh:
                 end.put(split-1)
                 end.put(face_end)
 
-    @ti.pyfunc
+    
     def setup_data_cpu(self,  vertex, shape, primitive):
         self.centroid   = []
         self.primitive  = primitive
@@ -170,7 +170,7 @@ class Bvh:
         ti.root.dense(ti.i, len(self.node)).place(self.compact_node )
 
 
-    @ti.pyfunc
+    
     def debug(self):
         fo = open("debug.obj", "w")
 
@@ -215,7 +215,7 @@ class Bvh:
 
 
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self, vertex, shape, primitive):
         self.offset = 0
         compact_node = self.compact_node.to_numpy()
@@ -230,7 +230,7 @@ class Bvh:
 
 
 
-    @ti.pyfunc
+    
     def partition(self,  low,  high, axis):
         i = low-1 
         pivot = self.centroid[high][axis]     
@@ -245,7 +245,7 @@ class Bvh:
         self.primitive[i+1],self.primitive[high] = self.primitive[high],self.primitive[i+1] 
         return i+1 
 
-    @ti.pyfunc
+    
     def cpu_sorter(self,  low,  high, axis):
         if axis == self.cur_sort_axis:
             return
@@ -267,7 +267,7 @@ class Bvh:
                 high_que.put(high)
         self.cur_sort_axis = axis
 
-    @ti.pyfunc
+    
     def find_best_axis(self,  boundary):
         if(boundary[0, 0] > boundary[0, 1]):
             if(boundary[0, 0] > boundary[0, 2]):
@@ -280,7 +280,7 @@ class Bvh:
             else:
                 return 2
  
-    @ti.pyfunc
+    
     def flatten_tree(self, compact_node, index):
         retOffset    = self.offset
         self.offset += 1

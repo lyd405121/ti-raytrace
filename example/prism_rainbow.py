@@ -48,7 +48,7 @@ class example(Example.example):
         mat.setColor([500.0, 500.0, 500.0])
         self.scene.add_shape(shape, mat)
 
-    @ti.pyfunc
+    
     def build_scene(self):
 
         Example.example.build_scene(self)
@@ -65,8 +65,8 @@ class example(Example.example):
         self.cam.scale = 10.0
         self.cam.set_target(0.0, 0.0, 0.0)
         self.cam.update()
-
-    @ti.pyfunc
+        print("!!!!this example takes a long time to compile!!!!!!!!!!!")
+    
     def render(self):
         return Example.example.render(self)
 

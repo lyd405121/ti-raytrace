@@ -20,7 +20,7 @@ class example(Example.example):
         Example.example.add_sphere_light(self)
         self.integrator    = PT_Spec.PathTrace(self.imgSizeX, self.imgSizeY, self.cam, self.scene,64)      
 
-    @ti.pyfunc
+    
     def build_scene(self):
         Example.example.build_scene(self)
         self.scene.process_normal()
@@ -33,7 +33,7 @@ class example(Example.example):
         self.cam.set_target(centre[0,0]*0.5, centre[0,1]*0.5, centre[0,2]*0.5)
         self.cam.update()
 
-    @ti.pyfunc
+    
     def render(self):
         return Example.example.render(self)
 

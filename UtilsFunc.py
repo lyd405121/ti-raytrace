@@ -59,7 +59,7 @@ def calc_matr_rgb_to_xyz(xy_r, xy_g, xy_b,XYZ_W):
 
 
 #https://en.wikipedia.org/wiki/Planck%27s_law#The_law
-@ti.pyfunc
+
 def Planck(Lambda, temperature):
     lambda_m = Lambda * 1.0e-9 #nm->m   
     #First radiation constant 2 h c²

@@ -14,7 +14,7 @@ class Texture:
         self.channel    = 0
         self.size       = 0
 
-    @ti.pyfunc
+    
     def load_image(self, imagePath):
         img1 = cv.imread(imagePath)
         dim  = img1.shape
@@ -34,7 +34,7 @@ class Texture:
                 self.np_img[j, self.hgt - i -1] = (R<<16) | (G<<8)  | (B) 
 
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         self.buf.from_numpy(self.np_img)
 

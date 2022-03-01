@@ -16,7 +16,7 @@ class example(Example.example):
         self.scene.add_obj('model/bdpt.obj')
         self.integrator    = BDPT_RGB.BDPT(self.imgSizeX, self.imgSizeY, self.cam, self.scene,64)      
 
-    @ti.pyfunc
+    
     def build_scene(self):
         Example.example.build_scene(self)
         self.scene.process_normal()
@@ -28,8 +28,8 @@ class example(Example.example):
         self.cam.scale = math.sqrt(size[0,0]*size[0,0] + size[0,1]*size[0,1] + size[0,2]*size[0,2])*0.5
         self.cam.set_target(centre[0,0]*0.5, centre[0,1]*0.5, centre[0,2]*0.5)
         self.cam.update()
-
-    @ti.pyfunc
+        print("!!!!this example takes a long time to compile!!!!!!!!!!!")
+    
     def render(self):
         return Example.example.render(self)
 

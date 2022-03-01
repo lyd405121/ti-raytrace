@@ -55,7 +55,7 @@ class BDPT:
 
         self.stack_size = stack_size
 
-    @ti.pyfunc
+    
     def setup_data_cpu(self):
         ti.root.dense(ti.ij,  [self.imgSizeX, self.imgSizeY] ).place(self.rgb_film)
         ti.root.dense(ti.ij,  [self.imgSizeX, self.imgSizeY] ).place(self.radiance)
@@ -71,7 +71,7 @@ class BDPT:
         self.lminustemp.setup_data_cpu()
         self.eminustemp.setup_data_cpu()
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
         # do nothing
         self.imgSizeX = self.imgSizeX
@@ -103,8 +103,10 @@ class BDPT:
 
     @ti.func
     def eye_path(self, i, j):
-        eye,scene,cam             = ti.static(self.eye, self.scene, self.cam)
-        #eye,scene            = ti.static(self.eye, self.scene)
+        cam   = self.cam 
+        scene = self.scene
+        eye   = self.eye
+
         origin                    = self.cam.get_ray_origin()
         dir                       = self.cam.get_ray_direction(i,j)
 
@@ -197,7 +199,9 @@ class BDPT:
 
     @ti.func
     def light_path(self, i, j):
-        light,scene               = ti.static(self.light, self.scene)
+        light  = self.light 
+        scene = self.scene
+
         light_pos,light_normal, light_dir,light_emission,light_prim,light_choice_pdf,light_dir_pdf= scene.sample_light()
 
         light_pdf                             = light_choice_pdf
@@ -296,15 +300,15 @@ class BDPT:
 
     @ti.func
     def mis_weight(self, i, j, e, l):
-        sample,eye,light,scene,cam               = ti.static(self.sample,self.eye,self.light, self.scene,self.cam)
+        light  = self.light 
+        scene = self.scene
+        sample = self.sample
+        eye = self.eye
+        cam = self.cam
         weight_sum = 0.0
 
-        #if ((l == 0)) & (i==273) &(j == 151):
-        #if (l != 0) | (e >1):
         if (l+e !=2):
             #store origin data
-
-
             if l>0:
                 self.ltemp.copy(0, light,i, j, l-1)
             if e>0:
@@ -476,11 +480,11 @@ class BDPT:
 
     @ti.func
     def connect_path(self, i, j, e, l):
-        scene                     = ti.static(self.scene)
-        cam                       = ti.static(self.cam)
-        eye                       = ti.static(self.eye)
-        light                     = ti.static(self.light)
-        sample                    = ti.static(self.sample)
+        scene                     = self.scene
+        cam                       = self.cam
+        eye                       = self.eye
+        light                     = self.light
+        sample                    = self.sample
 
         #new sample vertex
         radiance  = ti.Vector([0.0,0.0,0.0])
@@ -623,13 +627,6 @@ class BDPT:
                         l += 1
                         continue
                     
-                    
-                    '''
-                    r_path, eye_new_pos  = self.connect_path(i,j,e,l)
-                    self.radiance[i, j]        += r_path
-                    '''
-
-                    
                     r_path, eye_new_pos  = self.connect_path(i,j,e,l)
                     if e == 1:
                         self.radiance[eye_new_pos] += r_path 
@@ -643,5 +640,3 @@ class BDPT:
             frame    = float(self.cam.frame_gpu[0])
             coff     = 1.0 / (frame + 1.0)
             self.hdr[i,j] = self.radiance[i, j] * coff  + self.hdr[i,j]  * (1.0 - coff)
-            #if (i<=5) & (j>345) &(j <350) &(self.hdr[i,j].sum()> 0.0):
-            #    print("color",i,j,self.hdr[i,j])

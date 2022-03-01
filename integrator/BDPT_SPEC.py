@@ -65,7 +65,7 @@ class BDPT:
 
         self.stack_size = stack_size
 
-    @ti.pyfunc
+    
     def setup_data_cpu(self):
         Data   = []
         for line in open("spectrum/ciexyz31_1.csv", "r"):
@@ -106,7 +106,7 @@ class BDPT:
         self.lminustemp.setup_data_cpu()
         self.eminustemp.setup_data_cpu()
 
-    @ti.pyfunc
+    
     def setup_data_gpu(self):
 
         self.sensor.from_numpy(self.data_np)
@@ -123,7 +123,7 @@ class BDPT:
 
         self.normalize_spec(self.d65)
 
-    @ti.pyfunc
+    
     def normalize_spec(self, spec):
         self.cal_white_point(spec)
         
@@ -183,8 +183,9 @@ class BDPT:
 
     @ti.func
     def eye_path(self, i, j,Lambda):
-        eye,scene,cam             = ti.static(self.eye, self.scene, self.cam)
-        #eye,scene            = ti.static(self.eye, self.scene)
+        cam   = self.cam 
+        scene = self.scene
+        eye   = self.eye
         origin                    = self.cam.get_ray_origin()
         dir                       = self.cam.get_ray_direction(i,j)
 
@@ -257,10 +258,6 @@ class BDPT:
                         
 
                     eye.rpdf[i, j, pre_depth]  = pdfRev * abs(to.dot(eye.normal[i, j, depth])) * inv_dist2
-
-                    #if (i==1) & (j== 347):
-                    #    print(depth, pdfFwd, pdfRev, eye.fpdf[i, j, depth], eye.rpdf[i, j, pre_depth])
-
                     depth     += 1
                     pre_depth += 1
                     origin     = UF.offset_ray(pos , ts.sign(f_or_b)*fnormal)
@@ -275,8 +272,8 @@ class BDPT:
 
     @ti.func
     def light_path(self, i, j,Lambda):
-        light,scene               = ti.static(self.light, self.scene)
-        #light_pos,light_normal,light_emission,light_area,light_prim = scene.sample_light()
+        light  = self.light 
+        scene = self.scene
         light_pos,light_normal, light_dir,light_emission,light_prim,light_choice_pdf,light_dir_pdf= scene.sample_light()
         
         
@@ -375,15 +372,15 @@ class BDPT:
 
     @ti.func
     def mis_weight(self, i, j, e, l):
-        sample,eye,light,scene,cam               = ti.static(self.sample,self.eye,self.light, self.scene,self.cam)
+        light  = self.light 
+        scene = self.scene
+        sample = self.sample
+        eye = self.eye
+        cam = self.cam
         weight_sum = 0.0
 
-        #if ((l == 0)) & (i==273) &(j == 151):
-        #if (l != 0) | (e >1):
         if (l+e !=2):
             #store origin data
-
-
             if l>0:
                 self.ltemp.copy(0, light,i, j, l-1)
             if e>0:
@@ -555,11 +552,11 @@ class BDPT:
 
     @ti.func
     def connect_path(self, i, j, e, l, Lambda):
-        scene                     = ti.static(self.scene)
-        cam                       = ti.static(self.cam)
-        eye                       = ti.static(self.eye)
-        light                     = ti.static(self.light)
-        sample                    = ti.static(self.sample)
+        scene                     = self.scene
+        cam                       = self.cam
+        eye                       = self.eye
+        light                     = self.light
+        sample                    = self.sample
 
         #new sample vertex
         radiance  = 0.0
